@@ -1,0 +1,11 @@
+Flask
+Flask-Login
+Flask-SocketIO
+paho-mqtt
+numpy
+pandas
+scipy
+python-socketio
+python-engineio
+Werkzeug
+eventlet

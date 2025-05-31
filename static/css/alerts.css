@@ -1,0 +1,287 @@
+/* Styles pour la page d'alertes */
+
+.alerts-container {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Carte de résumé des alertes */
+.alert-summary-card {
+  margin-bottom: 25px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.summary-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20px;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.summary-content {
+  flex: 1;
+}
+
+.summary-content h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: #2c3e50;
+}
+
+.summary-content p {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+.summary-breakdown {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-around;
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.breakdown-item:last-child {
+  border-bottom: none;
+}
+
+.breakdown-label {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.breakdown-value {
+  font-weight: 600;
+  color: #3498db;
+}
+
+/* Carte d'actions */
+.alert-actions-card {
+  margin-bottom: 25px;
+}
+
+/* Carte principale des alertes */
+.alerts-main-card {
+  margin-bottom: 25px;
+}
+
+.nav-tabs .nav-link {
+  color: #7f8c8d;
+  font-weight: 500;
+  padding: 15px 20px;
+}
+
+.nav-tabs .nav-link.active {
+  color: #3498db;
+  font-weight: 600;
+}
+
+.tab-content {
+  padding: 20px 0;
+}
+
+/* Liste d'alertes */
+.alerts-list {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.alert-item {
+  display: flex;
+  padding: 20px;
+  border-bottom: 1px solid #f1f1f1;
+  transition: all 0.2s ease;
+}
+
+.alert-item:last-child {
+  border-bottom: none;
+}
+
+.alert-item:hover {
+  background-color: #f8f9fa;
+}
+
+.alert-severity {
+  width: 50px;
+  min-width: 50px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20px;
+  color: white;
+  padding: 10px 0;
+}
+
+.severity-text {
+  font-size: 0.7rem;
+  margin-top: 5px;
+  font-weight: 600;
+}
+
+.alert-severity-info {
+  background-color: #17a2b8;
+}
+
+.alert-severity-warning {
+  background-color: #f39c12;
+}
+
+.alert-severity-danger {
+  background-color: #e74c3c;
+}
+
+.alert-severity-dark {
+  background-color: #343a40;
+}
+
+.alert-severity-resolved {
+  background-color: #27ae60;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.alert-title {
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.alert-time {
+  font-size: 0.8rem;
+  color: #95a5a6;
+  text-align: right;
+}
+
+.alert-message {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.alert-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 20px;
+}
+
+.alert-actions .btn {
+  margin-bottom: 10px;
+}
+
+.alert-actions .btn:last-child {
+  margin-bottom: 0;
+}
+
+/* Message pas d'alertes */
+.no-alerts-message {
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.no-alerts-icon {
+  font-size: 3rem;
+  color: #27ae60;
+  margin-bottom: 20px;
+}
+
+.no-alerts-message h4 {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.no-alerts-message p {
+  color: #7f8c8d;
+  margin: 0;
+}
+
+/* Alerte résolue */
+.alert-item.resolved .alert-title,
+.alert-item.resolved .alert-message {
+  color: #95a5a6;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .summary-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+
+  .summary-content h3 {
+    font-size: 1.5rem;
+  }
+
+  .alert-severity {
+    width: 40px;
+    min-width: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .alert-header {
+    flex-direction: column;
+  }
+
+  .alert-time {
+    text-align: left;
+    margin-top: 5px;
+  }
+
+  .alert-actions {
+    flex-direction: row;
+    margin-top: 15px;
+    margin-left: 0;
+  }
+
+  .alert-actions .btn {
+    margin-bottom: 0;
+    margin-right: 10px;
+  }
+
+  .alert-item {
+    flex-direction: column;
+  }
+
+  .alert-severity {
+    width: 100%;
+    flex-direction: row;
+    margin-right: 0;
+    margin-bottom: 15px;
+    justify-content: flex-start;
+    padding: 10px;
+  }
+
+  .severity-text {
+    margin-top: 0;
+    margin-left: 10px;
+  }
+}

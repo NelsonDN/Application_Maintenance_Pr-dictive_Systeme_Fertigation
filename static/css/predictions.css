@@ -1,0 +1,280 @@
+/* Styles pour la page de prédictions */
+
+.predictions-container {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Carte d'en-tête */
+.predictions-header-card {
+  margin-bottom: 25px;
+}
+
+.predictions-header-card .card-title {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+}
+
+.predictions-header-card .card-text {
+  color: #7f8c8d;
+}
+
+/* Carte d'actions */
+.predictions-actions-card {
+  margin-bottom: 25px;
+}
+
+/* Grille de prédictions */
+.predictions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.prediction-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  transition: all 0.3s ease;
+}
+
+.prediction-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.prediction-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.prediction-sensor {
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.prediction-risk {
+  font-weight: 500;
+}
+
+/* Jauge de prédiction */
+.prediction-gauge-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.prediction-gauge {
+  position: relative;
+  width: 150px;
+  height: 150px;
+}
+
+.gauge-svg {
+  transform: rotate(-90deg);
+}
+
+.gauge-background {
+  fill: none;
+  stroke: #ecf0f1;
+  stroke-width: 10;
+}
+
+.gauge-progress {
+  fill: none;
+  stroke-width: 10;
+  stroke: url(#gauge-gradient);
+  stroke-linecap: round;
+  stroke-dasharray: 283;
+  stroke-dashoffset: calc(283 - (283 * var(--percentage)) / 100);
+  transition: stroke-dashoffset 1s ease;
+}
+
+.gauge-center {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.gauge-label {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+/* Détails de prédiction */
+.prediction-details {
+  margin-bottom: 20px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #7f8c8d;
+}
+
+.detail-value {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* Actions de prédiction */
+.prediction-actions {
+  text-align: center;
+}
+
+/* Carte de recommandations */
+.recommendations-card {
+  margin-bottom: 30px;
+}
+
+.recommendation-group {
+  margin-bottom: 30px;
+}
+
+.recommendation-sensor {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.recommendations-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.recommendation-item {
+  display: flex;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.recommendation-item:last-child {
+  margin-bottom: 0;
+}
+
+.recommendation-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-low {
+  background-color: rgba(46, 204, 113, 0.1);
+}
+
+.recommendation-medium {
+  background-color: rgba(52, 152, 219, 0.1);
+}
+
+.recommendation-high {
+  background-color: rgba(243, 156, 18, 0.1);
+}
+
+.recommendation-critical {
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.recommendation-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  color: white;
+  font-size: 1rem;
+}
+
+.recommendation-low .recommendation-icon {
+  background-color: #2ecc71;
+}
+
+.recommendation-medium .recommendation-icon {
+  background-color: #3498db;
+}
+
+.recommendation-high .recommendation-icon {
+  background-color: #f39c12;
+}
+
+.recommendation-critical .recommendation-icon {
+  background-color: #e74c3c;
+}
+
+.recommendation-content {
+  flex: 1;
+}
+
+.recommendation-title {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.recommendation-description {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  margin-bottom: 10px;
+}
+
+.recommendation-priority {
+  text-align: right;
+}
+
+/* Carte de tendance des risques */
+.risk-trend-card {
+  margin-bottom: 30px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .predictions-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .predictions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .prediction-gauge {
+    width: 120px;
+    height: 120px;
+  }
+
+  .gauge-value {
+    font-size: 1.5rem;
+  }
+}

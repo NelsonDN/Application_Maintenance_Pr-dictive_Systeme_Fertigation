@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}Alertes - Système de Maintenance Prédictive{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/alerts.css') }}">
+{% endblock %}
+
+{% block page_title %}Gestion des alertes{% endblock %}
+
+{% block content %}
+<div class="alerts-container">
+    <!-- Résumé des alertes -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card alert-summary-card">
+                <div class="card-header">
+                    <h5 class="card-title">Résumé des alertes (24h)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="summary-item">
+                                <div class="summary-icon bg-danger">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="summary-content">
+                                    <h3>{{ anomaly_summary.total }}</h3>
+                                    <p>Total des alertes</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="summary-breakdown">
+                                <div class="breakdown-item">
+                                    <span class="breakdown-label">Seuils</span>
+                                    <span class="breakdown-value">{{ anomaly_summary.threshold }}</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span class="breakdown-label">Statistiques</span>
+                                    <span class="breakdown-value">{{ anomaly_summary.statistical }}</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span class="breakdown-label">Tendances</span>
+                                    <span class="breakdown-value">{{ anomaly_summary.trend }}</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span class="breakdown-label">Communication</span>
+                                    <span class="breakdown-value">{{ anomaly_summary.communication }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card alert-actions-card">
+                <div class="card-header">
+                    <h5 class="card-title">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button id="resolve-all-btn" class="btn btn-success">
+                            <i class="fas fa-check-circle me-2"></i>Résoudre toutes
+                        </button>
+                        <button id="export-alerts-btn" class="btn btn-outline-primary">
+                            <i class="fas fa-download me-2"></i>Exporter
+                        </button>
+                        <button id="force-anomaly-btn" class="btn btn-outline-warning">
+                            <i class="fas fa-bug me-2"></i>Test d'anomalie
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Onglets des alertes -->
+    <div class="card alerts-main-card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="alerts-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active-alerts" type="button" role="tab">
+                        Alertes actives <span class="badge bg-danger ms-2">{{ active_alerts|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="resolved-tab" data-bs-toggle="tab" data-bs-target="#resolved-alerts" type="button" role="tab">
+                        Alertes résolues <span class="badge bg-success ms-2">{{ resolved_alerts|length }}</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="alerts-tab-content">
+                <!-- Alertes actives -->
+                <div class="tab-pane fade show active" id="active-alerts" role="tabpanel">
+                    {% if active_alerts %}
+                        <div class="alerts-list">
+                            {% for alert in active_alerts %}
+                                <div class="alert-item" data-alert-id="{{ alert.id }}">
+                                    <div class="alert-severity alert-severity-{{ alert.severity_class }}">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span class="severity-text">{{ alert.severity_text }}</span>
+                                    </div>
+                                    <div class="alert-content">
+                                        <div class="alert-header">
+                                            <h6 class="alert-title">{{ alert.sensor_name }} - {{ alert.alert_type }}</h6>
+                                            <div class="alert-time">
+                                                <i class="far fa-clock"></i>
+                                                {{ alert.created_at }}
+                                            </div>
+                                        </div>
+                                        <div class="alert-message">{{ alert.message }}</div>
+                                    </div>
+                                    <div class="alert-actions">
+                                        <button class="btn btn-sm btn-success resolve-alert-btn" data-alert-id="{{ alert.id }}">
+                                            <i class="fas fa-check"></i>
+                                            Résoudre
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info view-details-btn" data-alert-id="{{ alert.id }}">
+                                            <i class="fas fa-info-circle"></i>
+                                            Détails
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="no-alerts-message">
+                            <div class="no-alerts-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h4>Aucune alerte active</h4>
+                            <p>Tous vos capteurs fonctionnent normalement.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Alertes résolues -->
+                <div class="tab-pane fade" id="resolved-alerts" role="tabpanel">
+                    {% if resolved_alerts %}
+                        <div class="alerts-list">
+                            {% for alert in resolved_alerts %}
+                                <div class="alert-item resolved">
+                                    <div class="alert-severity alert-severity-resolved">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span class="severity-text">RÉSOLU</span>
+                                    </div>
+                                    <div class="alert-content">
+                                        <div class="alert-header">
+                                            <h6 class="alert-title">{{ alert.sensor_name }} - {{ alert.alert_type }}</h6>
+                                            <div class="alert-time">
+                                                <i class="far fa-clock"></i>
+                                                Créé: {{ alert.created_at }}
+                                                <br>
+                                                <i class="fas fa-check"></i>
+                                                Résolu: {{ alert.resolved_at }}
+                                            </div>
+                                        </div>
+                                        <div class="alert-message">{{ alert.message }}</div>
+                                    </div>
+                                    <div class="alert-actions">
+                                        <button class="btn btn-sm btn-outline-info view-details-btn" data-alert-id="{{ alert.id }}">
+                                            <i class="fas fa-info-circle"></i>
+                                            Détails
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="no-alerts-message">
+                            <div class="no-alerts-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <h4>Aucune alerte résolue</h4>
+                            <p>L'historique des alertes résolues apparaîtra ici.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour les détails d'alerte -->
+<div class="modal fade" id="alert-details-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Détails de l'alerte</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="alert-details-content">
+                <!-- Contenu chargé dynamiquement -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour forcer une anomalie -->
+<div class="modal fade" id="force-anomaly-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Forcer une anomalie (Test)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="force-anomaly-form">
+                    <div class="mb-3">
+                        <label for="test-sensor" class="form-label">Capteur</label>
+                        <select id="test-sensor" name="sensor_name" class="form-select" required>
+                            <option value="">Sélectionner un capteur</option>
+                            <option value="nitrogen">Azote (N)</option>
+                            <option value="phosphorus">Phosphore (P)</option>
+                            <option value="potassium">Potassium (K)</option>
+                            <option value="ph">pH</option>
+                            <option value="water_level">Niveau d'eau</option>
+                            <option value="water_flow">Débit d'eau</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="anomaly-type" class="form-label">Type d'anomalie</label>
+                        <select id="anomaly-type" name="anomaly_type" class="form-select" required>
+                            <option value="threshold_high">Seuil dépassé (haut)</option>
+                            <option value="threshold_low">Seuil dépassé (bas)</option>
+                            <option value="spike">Pic de valeur</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-warning" id="confirm-force-anomaly">Forcer l'anomalie</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+{% endblock %}

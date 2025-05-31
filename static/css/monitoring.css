@@ -1,0 +1,103 @@
+/* Styles pour la page de monitoring */
+
+.monitoring-container {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Contrôles de monitoring */
+.monitoring-controls {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.monitoring-controls .form-group {
+  margin-bottom: 0;
+}
+
+.monitoring-controls label {
+  font-weight: 500;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+/* Cartes de monitoring */
+.monitoring-card {
+  margin-bottom: 25px;
+}
+
+.monitoring-card .card-header {
+  padding: 15px 20px;
+}
+
+.monitoring-card .card-body {
+  padding: 20px;
+}
+
+.toggle-chart-btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Conteneurs de graphiques */
+.chart-container {
+  position: relative;
+  height: 250px;
+  margin-bottom: 20px;
+}
+
+/* Tableau de données */
+.table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
+  z-index: 10;
+}
+
+/* Animations pour les graphiques */
+@keyframes chartFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-container {
+  animation: chartFadeIn 0.5s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .chart-container {
+    height: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .monitoring-controls {
+    padding: 15px;
+  }
+
+  .monitoring-controls .form-group {
+    margin-bottom: 15px;
+  }
+
+  .chart-container {
+    height: 180px;
+  }
+}

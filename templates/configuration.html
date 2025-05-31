@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}Configuration - Système de Maintenance Prédictive{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/configuration.css') }}">
+{% endblock %}
+
+{% block page_title %}Configuration du système{% endblock %}
+
+{% block content %}
+<div class="configuration-container">
+    <!-- Statut du système -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card status-card">
+                <div class="card-header">
+                    <h5 class="card-title">Statut du système</h5>
+                </div>
+                <div class="card-body">
+                    <div class="status-item">
+                        <div class="status-icon">
+                            <i class="fas fa-globe" id="http-status-icon"></i>
+                        </div>
+                        <div class="status-content">
+                            <div class="status-title">Communication HTTP</div>
+                            <div class="status-value" id="http-status-text">
+                                {% if http_status.connected %}
+                                    Serveur actif - {{ http_status.endpoint }}
+                                {% else %}
+                                    Serveur inactif - Mode simulation
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="status-indicator">
+                            <span class="badge bg-{{ 'success' if http_status.connected else 'warning' }}">
+                                {{ 'ACTIF' if http_status.connected else 'INACTIF' }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="status-content">
+                            <div class="status-title">Simulateur HTTP</div>
+                            <div class="status-value">
+                                {% if http_status.simulation_active %}
+                                    Simulation active - Données générées
+                                {% else %}
+                                    Simulation arrêtée
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="status-indicator">
+                            <span class="badge bg-{{ 'info' if http_status.simulation_active else 'secondary' }}">
+                                {{ 'SIMULATION' if http_status.simulation_active else 'ARRÊTÉ' }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="status-content">
+                            <div class="status-title">Base de données</div>
+                            <div class="status-value">SQLite - Opérationnelle</div>
+                        </div>
+                        <div class="status-indicator">
+                            <span class="badge bg-success">ACTIF</span>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="status-content">
+                            <div class="status-title">Analyse prédictive</div>
+                            <div class="status-value">Loi de Weibull - Opérationnelle</div>
+                        </div>
+                        <div class="status-indicator">
+                            <span class="badge bg-success">ACTIF</span>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="status-content">
+                            <div class="status-title">Détection d'anomalies</div>
+                            <div class="status-value">Multi-niveaux - Opérationnelle</div>
+                        </div>
+                        <div class="status-indicator">
+                            <span class="badge bg-success">ACTIF</span>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-icon">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <div class="status-content">
+                            <div class="status-title">WebSocket temps réel</div>
+                            <div class="status-value" id="websocket-status-text">Connexion active</div>
+                        </div>
+                        <div class="status-indicator">
+                            <span class="badge bg-success" id="websocket-status-badge">CONNECTÉ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card actions-card">
+                <div class="card-header">
+                    <h5 class="card-title">Actions système</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button id="test-http-btn" class="btn btn-outline-primary">
+                            <i class="fas fa-globe me-2"></i>Tester endpoint HTTP
+                        </button>
+                        <button id="restart-simulator-btn" class="btn btn-outline-info">
+                            <i class="fas fa-robot me-2"></i>Redémarrer simulateur
+                        </button>
+                        <button id="backup-db-btn" class="btn btn-outline-success">
+                            <i class="fas fa-download me-2"></i>Sauvegarder base de données
+                        </button>
+                        <button id="clear-old-data-btn" class="btn btn-outline-warning">
+                            <i class="fas fa-broom me-2"></i>Nettoyer anciennes données
+                        </button>
+                        <button id="reset-system-btn" class="btn btn-outline-danger">
+                            <i class="fas fa-redo me-2"></i>Réinitialiser système
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Configuration des seuils -->
+    <div class="card config-card">
+        <div class="card-header">
+            <h5 class="card-title">Seuils des capteurs</h5>
+            <div class="card-tools">
+                <button id="save-thresholds-btn" class="btn btn-sm btn-success">
+                    <i class="fas fa-save me-1"></i>Sauvegarder
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for sensor_name, threshold in sensor_thresholds.items() %}
+                    <div class="col-md-4 mb-3">
+                        <div class="threshold-group">
+                            <h6 class="threshold-title">{{ sensor_name }}</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label">Min ({{ threshold.unit }})</label>
+                                    <input type="number" class="form-control threshold-input" 
+                                           data-sensor="{{ sensor_name }}" data-type="min" 
+                                           value="{{ threshold.min }}" step="0.1">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Max ({{ threshold.unit }})</label>
+                                    <input type="number" class="form-control threshold-input" 
+                                           data-sensor="{{ sensor_name }}" data-type="max" 
+                                           value="{{ threshold.max }}" step="0.1">
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label">Z-score</label>
+                                <input type="number" class="form-control threshold-input" 
+                                       data-sensor="{{ sensor_name }}" data-type="z_score" 
+                                       value="{{ threshold.z_score }}" step="0.1" min="1" max="5">
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Paramètres de maintenance prédictive -->
+    <div class="card config-card">
+        <div class="card-header">
+            <h5 class="card-title">Paramètres de maintenance prédictive (Weibull)</h5>
+            <div class="card-tools">
+                <button id="save-weibull-btn" class="btn btn-sm btn-success">
+                    <i class="fas fa-save me-1"></i>Sauvegarder
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for sensor_name, params in sensor_life_parameters.items() %}
+                    <div class="col-md-4 mb-3">
+                        <div class="weibull-group">
+                            <h6 class="weibull-title">{{ sensor_name }}</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label">Forme (β)</label>
+                                    <input type="number" class="form-control weibull-input" 
+                                           data-sensor="{{ sensor_name }}" data-param="shape" 
+                                           value="{{ params.shape }}" step="0.1" min="0.1">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Échelle (η)</label>
+                                    <input type="number" class="form-control weibull-input" 
+                                           data-sensor="{{ sensor_name }}" data-param="scale" 
+                                           value="{{ params.scale }}" step="100" min="100">
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    MTBF estimé: {{ (params.scale * 0.886)|round(0) }} heures
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Configuration HTTP -->
+    <div class="card config-card">
+        <div class="card-header">
+            <h5 class="card-title">Configuration HTTP</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">URL du serveur</label>
+                        <input type="text" class="form-control" id="server-url" 
+                               value="{{ http_status.server_url or 'http://localhost:5000' }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Endpoint de réception</label>
+                        <input type="text" class="form-control" id="http-endpoint" 
+                               value="{{ http_status.endpoint or '/api/sensor_data' }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Méthode HTTP</label>
+                        <input type="text" class="form-control" value="POST" readonly>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Format des données ESP32</label>
+                        <div class="code-example">
+                            <pre><code>{
+  "sensor_type": "npk_8in1",
+  "nitrogen": 450.0,
+  "phosphorus": 280.0,
+  "potassium": 520.0,
+  "ph": 7.2,
+  "conductivity": 1200.0,
+  "temperature": 25.0,
+  "humidity": 65.0,
+  "salinity": 800.0,
+  "timestamp": "2025-05-31T19:23:37"
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-12">
+                    <h6>Endpoints disponibles :</h6>
+                    <div class="endpoints-list">
+                        <div class="endpoint-item">
+                            <span class="endpoint-method">POST</span>
+                            <span class="endpoint-path">/api/sensor_data</span>
+                            <span class="endpoint-description">Réception des données de capteurs</span>
+                        </div>
+                        <div class="endpoint-item">
+                            <span class="endpoint-method">GET</span>
+                            <span class="endpoint-path">/api/alerts_count</span>
+                            <span class="endpoint-description">Nombre d'alertes actives</span>
+                        </div>
+                        <div class="endpoint-item">
+                            <span class="endpoint-method">GET</span>
+                            <span class="endpoint-path">/api/sensor_data/{sensor_name}</span>
+                            <span class="endpoint-description">Historique d'un capteur</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Logs système -->
+    <div class="card config-card">
+        <div class="card-header">
+            <h5 class="card-title">Logs système temps réel</h5>
+            <div class="card-tools">
+                <button id="clear-logs-btn" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-trash me-1"></i>Vider
+                </button>
+                <button id="refresh-logs-btn" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-sync me-1"></i>Actualiser
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="logs-container">
+                <pre id="system-logs">
+[{{ "now"|strftime("%Y-%m-%d %H:%M:%S") }}] INFO: Système HTTP démarré
+[{{ "now"|strftime("%Y-%m-%d %H:%M:%S") }}] INFO: Simulateur HTTP actif
+[{{ "now"|strftime("%Y-%m-%d %H:%M:%S") }}] INFO: Base de données initialisée
+[{{ "now"|strftime("%Y-%m-%d %H:%M:%S") }}] INFO: Détecteur d'anomalies activé
+[{{ "now"|strftime("%Y-%m-%d %H:%M:%S") }}] INFO: Module de maintenance prédictive activé
+[{{ "now"|strftime("%Y-%m-%d %H:%M:%S") }}] INFO: WebSocket temps réel actif
+                </pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/configuration.js') }}"></script>
+{% endblock %}

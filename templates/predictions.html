@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Prédictions - Système de Maintenance Prédictive{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/predictions.css') }}">
+{% endblock %}
+
+{% block page_title %}Analyses prédictives{% endblock %}
+
+{% block content %}
+<div class="predictions-container">
+    <!-- Actions principales -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card predictions-header-card">
+                <div class="card-body">
+                    <h5 class="card-title">Maintenance prédictive basée sur la loi de Weibull</h5>
+                    <p class="card-text">
+                        L'analyse prédictive utilise la distribution de Weibull pour estimer la probabilité de défaillance 
+                        de chaque capteur en fonction de son âge et de ses paramètres de fiabilité.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card predictions-actions-card">
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('predictions', refresh='true') }}" class="btn btn-primary">
+                            <i class="fas fa-sync-alt me-2"></i>Actualiser l'analyse
+                        </a>
+                        <button id="export-predictions-btn" class="btn btn-outline-primary">
+                            <i class="fas fa-download me-2"></i>Exporter rapport
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Grille des prédictions -->
+    <div class="predictions-grid">
+        {% for prediction in latest_predictions %}
+            <div class="prediction-card">
+                <div class="prediction-header">
+                    <h6 class="prediction-sensor">{{ prediction.sensor_name }}</h6>
+                    <span class="badge bg-{{ prediction.risk_class }} prediction-risk">{{ prediction.risk_level }}</span>
+                </div>
+                
+                <div class="prediction-gauge-container">
+                    <div class="prediction-gauge">
+                        <svg viewBox="0 0 100 100" class="gauge-svg">
+                            <circle cx="50" cy="50" r="45" class="gauge-background"></circle>
+                            <circle cx="50" cy="50" r="45" class="gauge-progress" 
+                                    style="--percentage: {{ prediction.failure_probability * 100 }}"></circle>
+                        </svg>
+                        <div class="gauge-center">
+                            <span class="gauge-value">{{ (prediction.failure_probability * 100)|round(1) }}%</span>
+                            <span class="gauge-label">Risque</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="prediction-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Défaillance prévue</span>
+                        <span class="detail-value">
+                            {% if prediction.predicted_failure_date %}
+                                {{ prediction.predicted_failure_date[:10] }}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Jours restants</span>
+                        <span class="detail-value">{{ prediction.days_until_failure or '--' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Confiance</span>
+                        <span class="detail-value">{{ (prediction.confidence_score * 100)|round(0) }}%</span>
+                    </div>
+                </div>
+                
+                <div class="prediction-actions">
+                    <button class="btn btn-sm btn-outline-info view-recommendations-btn" 
+                            data-sensor="{{ prediction.sensor_name }}">
+                        <i class="fas fa-lightbulb me-1"></i>Recommandations
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Recommandations détaillées -->
+    <div class="card recommendations-card">
+        <div class="card-header">
+            <h5 class="card-title">Recommandations de maintenance</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for sensor_name, sensor_recommendations in recommendations.items() %}
+                    <div class="col-md-6 mb-4">
+                        <div class="recommendation-group">
+                            <h6 class="recommendation-sensor">{{ sensor_name }}</h6>
+                            <div class="recommendations-list">
+                                {% for recommendation in sensor_recommendations %}
+                                    <div class="recommendation-item recommendation-{{ recommendation.priority.lower() }}">
+                                        <div class="recommendation-icon">
+                                            {% if recommendation.type == 'PREVENTIVE' %}
+                                                <i class="fas fa-shield-alt"></i>
+                                            {% elif recommendation.type == 'URGENT' %}
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                            {% elif recommendation.type == 'EMERGENCY' %}
+                                                <i class="fas fa-bolt"></i>
+                                            {% elif recommendation.type == 'REPLACEMENT' %}
+                                                <i class="fas fa-exchange-alt"></i>
+                                            {% else %}
+                                                <i class="fas fa-info-circle"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="recommendation-content">
+                                            <div class="recommendation-title">{{ recommendation.title }}</div>
+                                            <div class="recommendation-description">{{ recommendation.description }}</div>
+                                            <div class="recommendation-priority">
+                                                <span class="badge bg-{{ 'danger' if recommendation.priority == 'CRITICAL' else 'warning' if recommendation.priority == 'HIGH' else 'info' if recommendation.priority == 'MEDIUM' else 'secondary' }}">
+                                                    {{ recommendation.priority }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Graphique de tendance des risques -->
+    <div class="card risk-trend-card">
+        <div class="card-header">
+            <h5 class="card-title">Évolution des risques de défaillance</h5>
+        </div>
+        <div class="card-body">
+            <canvas id="risk-trend-chart" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour les détails de recommandations -->
+<div class="modal fade" id="recommendations-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Recommandations détaillées</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="recommendations-content">
+                <!-- Contenu chargé dynamiquement -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" id="schedule-maintenance-from-modal">
+                    <i class="fas fa-calendar-plus me-2"></i>Planifier maintenance
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/predictions.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Monitoring - Système de Maintenance Prédictive{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/monitoring.css') }}">
+<!-- Chart.js avec adaptateur de dates -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+{% endblock %}
+
+{% block page_title %}Monitoring en temps réel{% endblock %}
+
+{% block content %}
+<div class="monitoring-container">
+    <!-- Container pour les alertes temps réel -->
+    <div id="realtime-alerts" class="mb-3"></div>
+    
+    <!-- Contrôles -->
+    <div class="monitoring-controls">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="time-range">Période</label>
+                    <select id="time-range" class="form-select">
+                        <option value="1">Dernière heure</option>
+                        <option value="6">6 dernières heures</option>
+                        <option value="24" selected>24 dernières heures</option>
+                        <option value="72">3 derniers jours</option>
+                        <option value="168">7 derniers jours</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="refresh-rate">Rafraîchissement</label>
+                    <select id="refresh-rate" class="form-select">
+                        <option value="0">Temps réel</option>
+                        <option value="5">5 secondes</option>
+                        <option value="30" selected>30 secondes</option>
+                        <option value="60">1 minute</option>
+                        <option value="300">5 minutes</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <div class="d-grid">
+                        <button id="pause-realtime" class="btn btn-outline-warning">
+                            <i class="fas fa-pause me-2"></i>Pause temps réel
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <div class="d-grid">
+                        <button id="export-data" class="btn btn-outline-primary">
+                            <i class="fas fa-download me-2"></i>Exporter données
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Indicateurs temps réel -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card realtime-indicators">
+                <div class="card-header">
+                    <h5 class="card-title">Indicateurs temps réel</h5>
+                    <div class="realtime-status">
+                        <span id="realtime-status" class="badge bg-success">
+                            <i class="fas fa-circle"></i> Temps réel actif
+                        </span>
+                        <span id="last-data-time" class="text-muted ms-2">
+                            Dernière donnée: --
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="indicator-item">
+                                <div class="indicator-value" id="nitrogen-indicator">--</div>
+                                <div class="indicator-label">Azote (N)</div>
+                                <div class="indicator-unit">mg/kg</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="indicator-item">
+                                <div class="indicator-value" id="phosphorus-indicator">--</div>
+                                <div class="indicator-label">Phosphore (P)</div>
+                                <div class="indicator-unit">mg/kg</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="indicator-item">
+                                <div class="indicator-value" id="potassium-indicator">--</div>
+                                <div class="indicator-label">Potassium (K)</div>
+                                <div class="indicator-unit">mg/kg</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="indicator-item">
+                                <div class="indicator-value" id="water_level-indicator">--</div>
+                                <div class="indicator-label">Niveau eau</div>
+                                <div class="indicator-unit">%</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="indicator-item">
+                                <div class="indicator-value" id="water_flow-indicator">--</div>
+                                <div class="indicator-label">Débit eau</div>
+                                <div class="indicator-unit">L/min</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="indicator-item">
+                                <div class="indicator-value" id="ph-indicator">--</div>
+                                <div class="indicator-label">pH</div>
+                                <div class="indicator-unit">pH</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Graphiques NPK -->
+    <div class="card monitoring-card">
+        <div class="card-header">
+            <h5 class="card-title">Capteur NPK 8-en-1</h5>
+            <div class="card-tools">
+                <button class="btn btn-sm btn-outline-secondary toggle-chart-btn" data-target="npk-charts">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body" id="npk-charts">
+            <div class="row">
+                <!-- NPK -->
+                <div class="col-md-4">
+                    <div class="chart-container">
+                        <h6>Azote (N) <span class="current-value" id="nitrogen-current">--</span></h6>
+                        <canvas id="nitrogen-chart" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="chart-container">
+                        <h6>Phosphore (P) <span class="current-value" id="phosphorus-current">--</span></h6>
+                        <canvas id="phosphorus-chart" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="chart-container">
+                        <h6>Potassium (K) <span class="current-value" id="potassium-current">--</span></h6>
+                        <canvas id="potassium-chart" height="200"></canvas>
+                    </div>
+                </div>
+                
+                <!-- pH, Conductivité, Température -->
+                <div class="col-md-4">
+                    <div class="chart-container">
+                        <h6>pH <span class="current-value" id="ph-current">--</span></h6>
+                        <canvas id="ph-chart" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="chart-container">
+                        <h6>Conductivité <span class="current-value" id="conductivity-current">--</span></h6>
+                        <canvas id="conductivity-chart" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="chart-container">
+                        <h6>Température <span class="current-value" id="temperature-current">--</span></h6>
+                        <canvas id="temperature-chart" height="200"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Humidité, Salinité -->
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h6>Humidité <span class="current-value" id="humidity-current">--</span></h6>
+                        <canvas id="humidity-chart" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h6>Salinité <span class="current-value" id="salinity-current">--</span></h6>
+                        <canvas id="salinity-chart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Graphiques niveau d'eau -->
+    <div class="card monitoring-card">
+        <div class="card-header">
+            <h5 class="card-title">Capteur de niveau d'eau</h5>
+            <div class="card-tools">
+                <button class="btn btn-sm btn-outline-secondary toggle-chart-btn" data-target="water-level-charts">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body" id="water-level-charts">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h6>Niveau d'eau <span class="current-value" id="water_level-current">--</span></h6>
+                        <canvas id="water_level-chart" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h6>Température de l'eau <span class="current-value" id="water_temperature-current">--</span></h6>
+                        <canvas id="water_temperature-chart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Graphiques débit d'eau -->
+    <div class="card monitoring-card">
+        <div class="card-header">
+            <h5 class="card-title">Capteur de débit d'eau</h5>
+            <div class="card-tools">
+                <button class="btn btn-sm btn-outline-secondary toggle-chart-btn" data-target="water-flow-charts">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body" id="water-flow-charts">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h6>Débit d'eau <span class="current-value" id="water_flow-current">--</span></h6>
+                        <canvas id="water_flow-chart" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h6>Pression d'eau <span class="current-value" id="water_pressure-current">--</span></h6>
+                        <canvas id="water_pressure-chart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tableau de données temps réel -->
+    <div class="card monitoring-card">
+        <div class="card-header">
+            <h5 class="card-title">Données brutes temps réel</h5>
+            <div class="card-tools">
+                <button class="btn btn-sm btn-outline-secondary toggle-chart-btn" data-target="raw-data">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
+                <button id="clear-table" class="btn btn-sm btn-outline-danger ms-2">
+                    <i class="fas fa-trash me-1"></i>Vider
+                </button>
+            </div>
+        </div>
+        <div class="card-body" id="raw-data">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Horodatage</th>
+                            <th>Capteur</th>
+                            <th>Valeur</th>
+                            <th>Unité</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table-body">
+                        <!-- Les données seront ajoutées dynamiquement en temps réel -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template pour les données initiales -->
+<script id="initial-data" type="application/json">
+    {{ initial_data | safe }}
+</script>
+
+<!-- Template pour les seuils de capteurs -->
+<script id="sensor-thresholds" type="application/json">
+    {{ sensor_thresholds | tojson | safe }}
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/monitoring.js') }}"></script>
+{% endblock %}

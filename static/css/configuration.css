@@ -1,0 +1,173 @@
+/* Styles pour la page de configuration */
+
+.configuration-container {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Carte de statut */
+.status-card {
+  margin-bottom: 25px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.status-item:last-child {
+  border-bottom: none;
+}
+
+.status-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  color: #3498db;
+  font-size: 1.2rem;
+}
+
+.status-content {
+  flex: 1;
+}
+
+.status-title {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.status-value {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.status-indicator {
+  margin-left: 15px;
+}
+
+/* Carte d'actions */
+.actions-card {
+  margin-bottom: 25px;
+}
+
+/* Carte de configuration */
+.config-card {
+  margin-bottom: 25px;
+}
+
+/* Groupes de seuils */
+.threshold-group {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  height: 100%;
+}
+
+.threshold-title {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* Groupes de paramètres Weibull */
+.weibull-group {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  height: 100%;
+}
+
+.weibull-title {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* Liste de topics */
+.topics-list {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.topic-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.topic-item:last-child {
+  border-bottom: none;
+}
+
+.topic-label {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.topic-value {
+  font-family: monospace;
+  color: #3498db;
+}
+
+/* Conteneur de logs */
+.logs-container {
+  background-color: #2c3e50;
+  border-radius: 8px;
+  padding: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+#system-logs {
+  color: #ecf0f1;
+  font-family: monospace;
+  font-size: 0.9rem;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .threshold-group,
+  .weibull-group {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .status-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .status-icon {
+    margin-bottom: 10px;
+    margin-right: 0;
+  }
+
+  .status-indicator {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+
+  .topic-item {
+    flex-direction: column;
+  }
+
+  .topic-value {
+    margin-top: 5px;
+  }
+}

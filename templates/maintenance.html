@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}Maintenance - Système de Maintenance Prédictive{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/maintenance.css') }}">
+{% endblock %}
+
+{% block page_title %}Gestion de la maintenance{% endblock %}
+
+{% block content %}
+<div class="maintenance-container">
+    <!-- Statistiques de maintenance -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ planned_maintenance|length }}</h3>
+                    <p>Planifiées</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ in_progress_maintenance|length }}</h3>
+                    <p>En cours</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ completed_maintenance|length }}</h3>
+                    <p>Terminées</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon bg-info">
+                    <i class="fas fa-sign"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ cost_savings.potential_savings }}</h3>
+                    <p>Économies potentielles</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Analyse des coûts -->
+    <div class="row mt-5">
+        <div class="col-md-8">
+            <div class="card maintenance-card">
+                <div class="card-header">
+                    <h5 class="card-title">Analyse des coûts de maintenance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <canvas id="maintenance-costs-chart" height="200"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="cost-breakdown">
+                                <div class="cost-item">
+                                    <span class="cost-label">Coûts actuels</span>
+                                    <span class="cost-value">{{ cost_savings.current_costs }}</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="cost-label">Coûts optimaux</span>
+                                    <span class="cost-value">{{ cost_savings.optimal_costs }}</span>
+                                </div>
+                                <div class="cost-item highlight">
+                                    <span class="cost-label">Économies potentielles</span>
+                                    <span class="cost-value">{{ cost_savings.potential_savings }}</span>
+                                </div>
+                                <div class="cost-item">
+                                    <span class="cost-label">Ratio préventif</span>
+                                    <span class="cost-value">{{ (cost_savings.preventive_ratio * 100)|round(1) }}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card maintenance-card">
+                <div class="card-header">
+                    <h5 class="card-title">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button id="run-analysis-btn" class="btn btn-primary">
+                            <i class="fas fa-brain me-2"></i>Lancer l'analyse prédictive
+                        </button>
+                        <button id="schedule-maintenance-btn" class="btn btn-outline-primary">
+                            <i class="fas fa-calendar-plus me-2"></i>Planifier maintenance
+                        </button>
+                        <button id="export-maintenance-btn" class="btn btn-outline-secondary">
+                            <i class="fas fa-download me-2"></i>Exporter rapport
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Onglets de maintenance -->
+    <div class="card maintenance-main-card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="maintenance-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="planned-tab" data-bs-toggle="tab" data-bs-target="#planned-maintenance" type="button" role="tab">
+                        Planifiées <span class="badge bg-primary ms-2">{{ planned_maintenance|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress-maintenance" type="button" role="tab">
+                        En cours <span class="badge bg-warning ms-2">{{ in_progress_maintenance|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed-maintenance" type="button" role="tab">
+                        Terminées <span class="badge bg-success ms-2">{{ completed_maintenance|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="predictions-tab" data-bs-toggle="tab" data-bs-target="#predictions-maintenance" type="button" role="tab">
+                        Prédictions <span class="badge bg-info ms-2">{{ latest_predictions|length }}</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="maintenance-tab-content">
+                <!-- Maintenances planifiées -->
+                <div class="tab-pane fade show active" id="planned-maintenance" role="tabpanel">
+                    {% if planned_maintenance %}
+                        <div class="maintenance-list">
+                            {% for maintenance in planned_maintenance %}
+                                <div class="maintenance-item">
+                                    <div class="maintenance-icon">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <div class="maintenance-content">
+                                        <div class="maintenance-header">
+                                            <h6 class="maintenance-title">{{ maintenance.sensor_name }}</h6>
+                                            <span class="badge bg-{{ maintenance.status_class }}">{{ maintenance.status }}</span>
+                                        </div>
+                                        <div class="maintenance-type">{{ maintenance.maintenance_type }}</div>
+                                        <div class="maintenance-description">{{ maintenance.description }}</div>
+                                        <div class="maintenance-date">
+                                            <i class="far fa-calendar-alt"></i>
+                                            Planifiée pour: {{ maintenance.scheduled_date }}
+                                        </div>
+                                    </div>
+                                    <div class="maintenance-actions">
+                                        <form method="POST" action="{{ url_for('update_maintenance', maintenance_id=maintenance.id) }}" class="d-inline">
+                                            <input type="hidden" name="status" value="in_progress">
+                                            <button type="submit" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-play"></i>
+                                                Démarrer
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ url_for('update_maintenance', maintenance_id=maintenance.id) }}" class="d-inline">
+                                            <input type="hidden" name="status" value="cancelled">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-times"></i>
+                                                Annuler
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="no-maintenance-message">
+                            <div class="no-maintenance-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <h4>Aucune maintenance planifiée</h4>
+                            <p>Toutes les maintenances sont à jour.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Maintenances en cours -->
+                <div class="tab-pane fade" id="progress-maintenance" role="tabpanel">
+                    {% if in_progress_maintenance %}
+                        <div class="maintenance-list">
+                            {% for maintenance in in_progress_maintenance %}
+                                <div class="maintenance-item in-progress">
+                                    <div class="maintenance-icon">
+                                        <i class="fas fa-tools"></i>
+                                    </div>
+                                    <div class="maintenance-content">
+                                        <div class="maintenance-header">
+                                            <h6 class="maintenance-title">{{ maintenance.sensor_name }}</h6>
+                                            <span class="badge bg-{{ maintenance.status_class }}">{{ maintenance.status }}</span>
+                                        </div>
+                                        <div class="maintenance-type">{{ maintenance.maintenance_type }}</div>
+                                        <div class="maintenance-description">{{ maintenance.description }}</div>
+                                        <div class="maintenance-date">
+                                            <i class="far fa-calendar-alt"></i>
+                                            Démarrée: {{ maintenance.scheduled_date }}
+                                        </div>
+                                    </div>
+                                    <div class="maintenance-actions">
+                                        <form method="POST" action="{{ url_for('update_maintenance', maintenance_id=maintenance.id) }}" class="d-inline">
+                                            <input type="hidden" name="status" value="completed">
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="fas fa-check"></i>
+                                                Terminer
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="no-maintenance-message">
+                            <div class="no-maintenance-icon">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <h4>Aucune maintenance en cours</h4>
+                            <p>Aucune intervention n'est actuellement en cours.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Maintenances terminées -->
+                <div class="tab-pane fade" id="completed-maintenance" role="tabpanel">
+                    {% if completed_maintenance %}
+                        <div class="maintenance-list">
+                            {% for maintenance in completed_maintenance %}
+                                <div class="maintenance-item completed">
+                                    <div class="maintenance-icon">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="maintenance-content">
+                                        <div class="maintenance-header">
+                                            <h6 class="maintenance-title">{{ maintenance.sensor_name }}</h6>
+                                            <span class="badge bg-{{ maintenance.status_class }}">{{ maintenance.status }}</span>
+                                        </div>
+                                        <div class="maintenance-type">{{ maintenance.maintenance_type }}</div>
+                                        <div class="maintenance-description">{{ maintenance.description }}</div>
+                                        <div class="maintenance-date">
+                                            <i class="far fa-calendar-alt"></i>
+                                            Terminée: {{ maintenance.completed_date }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="no-maintenance-message">
+                            <div class="no-maintenance-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <h4>Aucune maintenance terminée</h4>
+                            <p>L'historique des maintenances apparaîtra ici.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Prédictions -->
+                <div class="tab-pane fade" id="predictions-maintenance" role="tabpanel">
+                    {% if latest_predictions %}
+                        <div class="predictions-grid">
+                            {% for prediction in latest_predictions %}
+                                <div class="prediction-card">
+                                    <div class="prediction-header">
+                                        <h6>{{ prediction.sensor_name }}</h6>
+                                        <span class="badge bg-{{ prediction.risk_class }}">{{ prediction.risk_level }}</span>
+                                    </div>
+                                    <div class="prediction-body">
+                                        <div class="prediction-gauge">
+                                            <div class="gauge-circle">
+                                                <div class="gauge-fill" style="--percentage: {{ prediction.failure_probability * 100 }}%"></div>
+                                                <div class="gauge-text">
+                                                    <span class="gauge-value">{{ (prediction.failure_probability * 100)|round(1) }}%</span>
+                                                    <span class="gauge-label">Risque</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="prediction-details">
+                                            <div class="prediction-item">
+                                                <span class="prediction-label">Défaillance prévue</span>
+                                                <span class="prediction-value">{{ prediction.predicted_failure_date or '--' }}</span>
+                                            </div>
+                                            <div class="prediction-item">
+                                                <span class="prediction-label">Jours restants</span>
+                                                <span class="prediction-value">{{ prediction.days_until_failure or '--' }}</span>
+                                            </div>
+                                            <div class="prediction-item">
+                                                <span class="prediction-label">Confiance</span>
+                                                <span class="prediction-value">{{ (prediction.confidence_score * 100)|round(0) }}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="no-maintenance-message">
+                            <div class="no-maintenance-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h4>Aucune prédiction disponible</h4>
+                            <p>Lancez une analyse prédictive pour voir les résultats.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/maintenance.js') }}"></script>
+{% endblock %}
