@@ -1,6 +1,6 @@
-# FertiSmart - Système de Maintenance Prédictive pour Fertigation
+# Cassie's Predictive Tool - Système de Maintenance Prédictive pour Fertigation
 
-FertiSmart est une application web complète pour la surveillance, la détection d'anomalies et la maintenance prédictive des systèmes de fertigation en agriculture. Ce système utilise des capteurs connectés via MQTT, une analyse prédictive basée sur la loi de Weibull, et une détection d'anomalies multi-niveaux pour optimiser la maintenance des équipements.
+Cassie's Predictive Tool est une application web complète pour la surveillance, la détection d'anomalies et la maintenance prédictive des systèmes de fertigation en agriculture. Ce système utilise des capteurs connectés via MQTT, une analyse prédictive basée sur la loi de Weibull, et une détection d'anomalies multi-niveaux pour optimiser la maintenance des équipements.
 
 ## Fonctionnalités
 
@@ -133,7 +133,7 @@ Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
 
 ## Contact
 
-Pour toute question ou suggestion, veuillez contacter l'équipe de développement à l'adresse support@fertismart.com
+Pour toute question ou suggestion, veuillez contacter l'équipe de développement à l'adresse 
 \`\`\`
 
 Enfin, créons un fichier de configuration pour Docker pour faciliter le déploiement :
