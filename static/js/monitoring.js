@@ -1,4 +1,3 @@
-import { Chart } from "@/components/ui/chart"
 /**
  * Script pour la page Monitoring avec temps réel complet
  */
@@ -143,7 +142,7 @@ function createChart(sensorName) {
   const color = getSensorColor(sensorName)
 
   // Utiliser Chart directement depuis la bibliothèque chargée via CDN
-  charts[sensorName] = new Chart(ctx, {
+  charts[sensorName] = new window.Chart(ctx, {
     type: "line",
     data: {
       labels: [],

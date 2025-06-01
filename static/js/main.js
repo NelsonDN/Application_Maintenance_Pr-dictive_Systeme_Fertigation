@@ -97,7 +97,7 @@ function updateConnectionStatus(connected, message = null) {
 
     if (connected) {
       icon.className = "fas fa-circle text-success"
-      text.textContent = "Temps réel actif"
+      text.textContent = "Temps réel actif  "
     } else {
       icon.className = "fas fa-circle text-danger"
       text.textContent = message || "Connexion perdue"
@@ -107,7 +107,7 @@ function updateConnectionStatus(connected, message = null) {
   if (httpStatusIcon && httpStatusText) {
     if (connected) {
       httpStatusIcon.textContent = "🟢"
-      httpStatusText.textContent = "Communication HTTP active"
+      httpStatusText.textContent = "Communication active"
     } else {
       httpStatusIcon.textContent = "🔴"
       httpStatusText.textContent = "Communication interrompue"

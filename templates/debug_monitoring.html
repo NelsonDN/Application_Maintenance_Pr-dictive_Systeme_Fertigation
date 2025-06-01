@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Monitoring</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Debug Monitoring</h1>
+    <div id="debug-output"></div>
+    
+    <script>
+        // Script de débogage pour identifier le problème
+        const debugOutput = document.getElementById('debug-output');
+        
+        function log(message) {
+            console.log(message);
+            debugOutput.innerHTML += `<p>${new Date().toLocaleTimeString()}: ${message}</p>`;
+        }
+        
+        // 1. Test de récupération des données via API
+        async function testAPI() {
+            log("🔍 Test de l'API des capteurs...");
+            
+            const sensors = ['nitrogen', 'phosphorus', 'potassium', 'ph', 'water_level', 'water_flow'];
+            
+            for (const sensor of sensors) {
+                try {
+                    const response = await fetch(`/api/sensor_data/${sensor}?hours=1`);
+                    const data = await response.json();
+                    log(`📊 ${sensor}: ${data.length} enregistrements trouvés`);
+                    
+                    if (data.length > 0) {
+                        log(`   Dernier: ${data[data.length-1].value} ${data[data.length-1].unit} à ${data[data.length-1].timestamp}`);
+                    }
+                } catch (error) {
+                    log(`❌ Erreur API ${sensor}: ${error.message}`);
+                }
+            }
+        }
+        
+        // 2. Test WebSocket
+        function testWebSocket() {
+            log("🔌 Test WebSocket...");
+            
+            const socket = io();
+            
+            socket.on('connect', () => {
+                log("✅ WebSocket connecté");
+            });
+            
+            socket.on('disconnect', () => {
+                log("❌ WebSocket déconnecté");
+            });
+            
+            socket.on('sensor_data', (data) => {
+                log(`📡 Données reçues: ${data.sensor_name} = ${data.value} ${data.unit}`);
+            });
+            
+            socket.on('connect_error', (error) => {
+                log(`❌ Erreur WebSocket: ${error}`);
+            });
+        }
+        
+        // 3. Test Chart.js
+        function testChartJS() {
+            log("📈 Test Chart.js...");
+            
+            if (typeof Chart === 'undefined') {
+                log("❌ Chart.js non chargé!");
+                return;
+            }
+            
+            log("✅ Chart.js disponible");
+            
+            // Créer un graphique de test
+            const canvas = document.createElement('canvas');
+            canvas.id = 'test-chart';
+            canvas.width = 400;
+            canvas.height = 200;
+            document.body.appendChild(canvas);
+            
+            try {
+                const ctx = canvas.getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Test1', 'Test2', 'Test3'],
+                        datasets: [{
+                            label: 'Test Dataset',
+                            data: [10, 20, 15],
+                            borderColor: 'rgb(75, 192, 192)'
+                        }]
+                    }
+                });
+                log("✅ Graphique de test créé avec succès");
+            } catch (error) {
+                log(`❌ Erreur création graphique: ${error.message}`);
+            }
+        }
+        
+        // 4. Test des éléments DOM
+        function testDOMElements() {
+            log("🏗️ Test des éléments DOM...");
+            
+            // Vérifier les éléments critiques
+            const elements = [
+                'initial-data',
+                'sensor-thresholds',
+                'nitrogen-chart',
+                'nitrogen-indicator',
+                'realtime-status'
+            ];
+            
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    log(`✅ Élément ${id} trouvé`);
+                    if (id === 'initial-data') {
+                        try {
+                            const data = JSON.parse(element.textContent);
+                            log(`   Contenu initial-data: ${Object.keys(data).length} capteurs`);
+                            Object.keys(data).forEach(sensor => {
+                                log(`     ${sensor}: ${data[sensor].length} points`);
+                            });
+                        } catch (error) {
+                            log(`❌ Erreur parsing initial-data: ${error.message}`);
+                        }
+                    }
+                } else {
+                    log(`❌ Élément ${id} manquant`);
+                }
+            });
+        }
+        
+        // 5. Test manual de l'endpoint
+        async function testDirectEndpoint() {
+            log("🎯 Test endpoint direct...");
+            
+            try {
+                // Simuler une requête comme l'ESP32
+                const testData = {
+                    sensor_type: 'npk_8in1',
+                    nitrogen: 450.5,
+                    phosphorus: 280.2,
+                    potassium: 520.8,
+                    ph: 7.2,
+                    timestamp: new Date().toISOString()
+                };
+                
+                const response = await fetch('/api/sensor_data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                log(`📤 Test envoi données: ${response.status} - ${result.message || result.error}`);
+                
+            } catch (error) {
+                log(`❌ Erreur test endpoint: ${error.message}`);
+            }
+        }
+        
+        // Lancer tous les tests
+        window.onload = function() {
+            log("🚀 Démarrage des tests de diagnostic...");
+            
+            setTimeout(testDOMElements, 100);
+            setTimeout(testChartJS, 500);
+            setTimeout(testWebSocket, 1000);
+            setTimeout(testAPI, 2000);
+            setTimeout(testDirectEndpoint, 3000);
+        };
+    </script>
+</body>
+</html>

@@ -330,7 +330,8 @@ def configuration():
             'configuration.html',
             http_status=http_status,
             sensor_thresholds=Config.SENSOR_THRESHOLDS,
-            sensor_life_parameters=Config.SENSOR_LIFE_PARAMETERS
+            sensor_life_parameters=Config.SENSOR_LIFE_PARAMETERS,
+            now=datetime.now() 
         )
         
     except Exception as e:
@@ -604,6 +605,50 @@ def api_run_predictive_analysis():
     except Exception as e:
         print(f"❌ Erreur analyse prédictive: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/force_predictive_analysis', methods=['POST'])
+@login_required
+def api_force_predictive_analysis():
+    """Force l'exécution de l'analyse prédictive"""
+    try:
+        if not predictive_maintenance:
+            return jsonify({'success': False, 'error': 'Module de maintenance prédictive non disponible'}), 500
+        
+        print("🔄 Forçage de l'analyse prédictive...")
+        
+        # Supprimer les anciennes prédictions
+        try:
+            conn = db.get_connection()
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM predictions")
+            conn.commit()
+            conn.close()
+            print("✅ Anciennes prédictions supprimées")
+        except Exception as db_error:
+            print(f"⚠️ Erreur lors de la suppression des anciennes prédictions: {db_error}")
+            # Continuer malgré l'erreur
+        
+        # Exécuter l'analyse pour tous les capteurs
+        try:
+            results = predictive_maintenance.run_predictive_analysis()
+            print(f"✅ Analyse terminée: {results}")
+        except Exception as analysis_error:
+            print(f"❌ Erreur lors de l'analyse prédictive: {analysis_error}")
+            traceback.print_exc()
+            return jsonify({'success': False, 'error': str(analysis_error)}), 500
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Analyse terminée, {results.get("sensors_analyzed", 0)} capteurs analysés',
+            'results': results
+        })
+        
+    except Exception as e:
+        print(f"❌ Erreur analyse prédictive forcée: {e}")
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 
 # ==================== ÉVÉNEMENTS WEBSOCKET ====================
 

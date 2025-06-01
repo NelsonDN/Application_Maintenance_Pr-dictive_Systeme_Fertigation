@@ -1,4 +1,3 @@
-import { Chart } from "@/components/ui/chart"
 /**
  * Script pour la page Dashboard avec temps réel
  */
@@ -75,7 +74,7 @@ function initializeMainChart() {
   const ctx = document.getElementById("main-chart")
   if (!ctx) return
 
-  mainChart = new Chart(ctx, {
+  mainChart = new window.Chart(ctx, {
     type: "line",
     data: {
       labels: [],
@@ -220,6 +219,18 @@ function setupEventListeners() {
       this.classList.remove("sensor-hover")
     })
   })
+
+  // Écouter les mises à jour WebSocket
+  if (window.MainApp && window.MainApp.socket) {
+    // Écouter les données de capteurs en temps réel
+    window.MainApp.socket.on("sensor_data", (data) => {
+      // Mettre à jour les valeurs affichées
+      updateSensorValue(data)
+
+      // Ajouter au graphique principal
+      addDataPoint(data.sensor_name, data.timestamp, data.value)
+    })
+  }
 }
 
 /**
@@ -333,6 +344,42 @@ function getSeverityClass(severity) {
     critical: "dark",
   }
   return classes[severity] || "info"
+}
+
+function updateSensorValue(data) {
+  const sensorName = data.sensor_name
+  const value = data.value
+  const unit = data.unit
+
+  // Mettre à jour la valeur affichée
+  const valueElement = document.getElementById(`${sensorName}-value`)
+  if (valueElement) {
+    valueElement.textContent = `${value} ${unit}`
+
+    // Animation de mise à jour
+    valueElement.classList.add("updated")
+    setTimeout(() => {
+      valueElement.classList.remove("updated")
+    }, 1000)
+  }
+
+  // Mettre à jour le statut du capteur
+  const statusElement = document.getElementById(`${sensorName}-status`)
+  if (statusElement) {
+    const icon = statusElement.querySelector("i")
+    if (data.anomalies_count > 0) {
+      icon.className = "fas fa-circle text-warning"
+    } else {
+      icon.className = "fas fa-circle text-success"
+    }
+  }
+
+  // Mettre à jour l'heure de dernière mise à jour
+  const lastUpdateElement = document.getElementById("last-update-time")
+  if (lastUpdateElement) {
+    const timestamp = new Date(data.timestamp)
+    lastUpdateElement.textContent = `Dernière mise à jour: ${timestamp.toLocaleTimeString()}`
+  }
 }
 
 // Exporter pour utilisation globale

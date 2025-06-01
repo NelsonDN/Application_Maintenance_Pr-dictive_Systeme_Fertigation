@@ -313,12 +313,12 @@
         <div class="card-body">
             <div class="logs-container">
                 <pre id="system-logs">
-[{{ "now"|strftime("%Y-%m-%d %H:%M:%S") }}] INFO: Système HTTP démarré
-[{{ "now"|strftime("%Y-%m-%d %H:%M:%S") }}] INFO: Simulateur HTTP actif
-[{{ "now"|strftime("%Y-%m-%d %H:%M:%S") }}] INFO: Base de données initialisée
-[{{ "now"|strftime("%Y-%m-%d %H:%M:%S") }}] INFO: Détecteur d'anomalies activé
-[{{ "now"|strftime("%Y-%m-%d %H:%M:%S") }}] INFO: Module de maintenance prédictive activé
-[{{ "now"|strftime("%Y-%m-%d %H:%M:%S") }}] INFO: WebSocket temps réel actif
+[{{ now.strftime("%Y-%m-%d %H:%M:%S") }}]  INFO: Système HTTP démarré
+[{{ now.strftime("%Y-%m-%d %H:%M:%S") }}]  INFO: Simulateur HTTP actif
+[{{ now.strftime("%Y-%m-%d %H:%M:%S") }}]  INFO: Base de données initialisée
+[{{ now.strftime("%Y-%m-%d %H:%M:%S") }}]  INFO: Détecteur d'anomalies activé
+[{{ now.strftime("%Y-%m-%d %H:%M:%S") }}]  INFO: Module de maintenance prédictive activé
+[{{ now.strftime("%Y-%m-%d %H:%M:%S") }}]  INFO: WebSocket temps réel actif
                 </pre>
             </div>
         </div>
