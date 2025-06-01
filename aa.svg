@@ -1,0 +1,175 @@
+<svg viewBox="0 0 800 1200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Styles -->
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="black"/>
+    </marker>
+  </defs>
+  
+  <style>
+    .process { fill: white; stroke: black; stroke-width: 2; }
+    .decision { fill: white; stroke: black; stroke-width: 2; }
+    .terminal { fill: white; stroke: black; stroke-width: 2; }
+    .text { font-family: Arial, sans-serif; font-size: 11px; text-anchor: middle; fill: black; }
+    .arrow { stroke: black; stroke-width: 2; marker-end: url(#arrowhead); }
+    .title { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; text-anchor: middle; fill: black; }
+  </style>
+  
+  <!-- Title -->
+  <text x="400" y="25" class="title">ALGORIGRAMME - DÉTECTION D'ANOMALIES DES CAPTEURS</text>
+  
+  <!-- 1. START -->
+  <ellipse cx="400" cy="60" rx="50" ry="20" class="terminal"/>
+  <text x="400" y="65" class="text">DÉBUT</text>
+  
+  <!-- Arrow -->
+  <line x1="400" y1="80" x2="400" y2="105" class="arrow"/>
+  
+  <!-- 2. Input -->
+  <rect x="320" y="105" width="160" height="35" class="process"/>
+  <text x="400" y="120" class="text">Réception lecture capteur</text>
+  <text x="400" y="132" class="text">(sensor_name, value, unit)</text>
+  
+  <!-- Arrow -->
+  <line x1="400" y1="140" x2="400" y2="165" class="arrow"/>
+  
+  <!-- 3. Update communication -->
+  <rect x="300" y="165" width="200" height="25" class="process"/>
+  <text x="400" y="180" class="text">Mettre à jour dernière communication</text>
+  
+  <!-- Arrow -->
+  <line x1="400" y1="190" x2="400" y2="215" class="arrow"/>
+  
+  <!-- 4. Initialize -->
+  <rect x="320" y="215" width="160" height="25" class="process"/>
+  <text x="400" y="230" class="text">Initialiser anomalies = []</text>
+  
+  <!-- Arrow -->
+  <line x1="400" y1="240" x2="400" y2="275" class="arrow"/>
+  
+  <!-- 5. Threshold check decision -->
+  <polygon points="340,275 460,275 480,300 460,325 340,325 320,300" class="decision"/>
+  <text x="400" y="295" class="text">Seuil défini pour</text>
+  <text x="400" y="307" class="text">ce capteur ?</text>
+  
+  <!-- YES branch -->
+  <line x1="480" y1="300" x2="520" y2="300" class="arrow"/>
+  <text x="490" y="295" class="text" font-size="9">OUI</text>
+  
+  <!-- 6. Value check -->
+  <polygon points="520,275 640,275 660,300 640,325 520,325 500,300" class="decision"/>
+  <text x="580" y="295" class="text">Valeur &lt; min</text>
+  <text x="580" y="307" class="text">ou &gt; max ?</text>
+  
+  <!-- YES from value check -->
+  <line x1="580" y1="325" x2="580" y2="355" class="arrow"/>
+  <text x="590" y="340" class="text" font-size="9">OUI</text>
+  
+  <!-- 7. Add threshold anomaly -->
+  <rect x="510" y="355" width="140" height="35" class="process"/>
+  <text x="580" y="370" class="text">Ajouter anomalie seuil</text>
+  <text x="580" y="382" class="text">(severity: HIGH)</text>
+  
+  <!-- Back to main flow -->
+  <line x1="510" y1="372" x2="400" y2="372" class="arrow"/>
+  <line x1="400" y1="372" x2="400" y2="420" class="arrow"/>
+  
+  <!-- NO from value check -->
+  <line x1="660" y1="300" x2="700" y2="300" class="arrow"/>
+  <line x1="700" y1="300" x2="700" y2="420" class="arrow"/>
+  <line x1="700" y1="420" x2="400" y2="420" class="arrow"/>
+  <text x="670" y="295" class="text" font-size="9">NON</text>
+  
+  <!-- NO from threshold check -->
+  <line x1="400" y1="325" x2="400" y2="420" class="arrow"/>
+  <text x="380" y="360" class="text" font-size="9">NON</text>
+  
+  <!-- 8. Get historical data -->
+  <rect x="300" y="430" width="200" height="35" class="process"/>
+  <text x="400" y="445" class="text">Récupérer données historiques</text>
+  <text x="400" y="457" class="text">(2 dernières heures)</text>
+  
+  <!-- Arrow -->
+  <line x1="400" y1="465" x2="400" y2="495" class="arrow"/>
+  
+  <!-- 9. Check data sufficiency -->
+  <polygon points="340,495 460,495 480,520 460,545 340,545 320,520" class="decision"/>
+  <text x="400" y="515" class="text">Données ≥ 10</text>
+  <text x="400" y="527" class="text">valeurs ?</text>
+  
+  <!-- YES branch -->
+  <line x1="480" y1="520" x2="520" y2="520" class="arrow"/>
+  <text x="490" y="515" class="text" font-size="9">OUI</text>
+  
+  <!-- 10. Calculate statistics -->
+  <rect x="520" y="485" width="140" height="70" class="process"/>
+  <text x="590" y="505" class="text">Calculer moyenne et</text>
+  <text x="590" y="517" class="text">écart-type des valeurs</text>
+  <text x="590" y="529" class="text">historiques</text>
+  <text x="590" y="541" class="text">Calculer z-score</text>
+  
+  <!-- Arrow -->
+  <line x1="590" y1="555" x2="590" y2="585" class="arrow"/>
+  
+  <!-- 11. Statistical anomaly check -->
+  <polygon points="530,585 650,585 670,610 650,635 530,635 510,610" class="decision"/>
+  <text x="590" y="607" class="text">z-score &gt; 4.0 ?</text>
+  
+  <!-- YES from statistical check -->
+  <line x1="590" y1="635" x2="590" y2="665" class="arrow"/>
+  <text x="600" y="650" class="text" font-size="9">OUI</text>
+  
+  <!-- 12. Add statistical anomaly -->
+  <rect x="520" y="665" width="140" height="35" class="process"/>
+  <text x="590" y="680" class="text">Ajouter anomalie statistique</text>
+  <text x="590" y="692" class="text">(severity: MEDIUM)</text>
+  
+  <!-- Back to main flow -->
+  <line x1="520" y1="682" x2="400" y2="682" class="arrow"/>
+  <line x1="400" y1="682" x2="400" y2="730" class="arrow"/>
+  
+  <!-- NO from statistical check -->
+  <line x1="670" y1="610" x2="710" y2="610" class="arrow"/>
+  <line x1="710" y1="610" x2="710" y2="730" class="arrow"/>
+  <line x1="710" y1="730" x2="400" y2="730" class="arrow"/>
+  <text x="680" y="605" class="text" font-size="9">NON</text>
+  
+  <!-- NO from data sufficiency -->
+  <line x1="320" y1="520" x2="280" y2="520" class="arrow"/>
+  <line x1="280" y1="520" x2="280" y2="730" class="arrow"/>
+  <line x1="280" y1="730" x2="400" y2="730" class="arrow"/>
+  <text x="300" y="515" class="text" font-size="9">NON</text>
+  
+  <!-- 13. Return results -->
+  <rect x="320" y="740" width="160" height="35" class="process"/>
+  <text x="400" y="755" class="text">Retourner liste des</text>
+  <text x="400" y="767" class="text">anomalies détectées</text>
+  
+  <!-- Arrow -->
+  <line x1="400" y1="775" x2="400" y2="805" class="arrow"/>
+  
+  <!-- 14. END -->
+  <ellipse cx="400" cy="825" rx="50" ry="20" class="terminal"/>
+  <text x="400" y="830" class="text">FIN</text>
+  
+  <!-- Legend -->
+  <rect x="50" y="870" width="280" height="150" fill="white" stroke="black" stroke-width="1"/>
+  <text x="190" y="890" class="title" font-size="12">LÉGENDE</text>
+  
+  <!-- Legend symbols -->
+  <ellipse cx="80" cy="910" rx="25" ry="12" class="terminal"/>
+  <text x="130" y="915" class="text" text-anchor="start">Début / Fin</text>
+  
+  <rect x="65" y="925" width="30" height="18" class="process"/>
+  <text x="130" y="937" class="text" text-anchor="start">Processus</text>
+  
+  <polygon points="65,950 95,950 105,960 95,970 65,970 55,960" class="decision"/>
+  <text x="130" y="963" class="text" text-anchor="start">Décision</text>
+  
+  <line x1="65" y1="980" x2="95" y2="980" class="arrow"/>
+  <text x="130" y="985" class="text" text-anchor="start">Flux</text>
+  
+  <text x="60" y="1005" class="text" text-anchor="start" font-size="10">Types d'anomalies détectées :</text>
+  <text x="60" y="1018" class="text" text-anchor="start" font-size="10">• SEUIL (HIGH) : Valeur &lt; min ou &gt; max</text>
+  <text x="60" y="1031" class="text" text-anchor="start" font-size="10">• STATISTIQUE (MEDIUM) : z-score &gt; 4.0</text>
+</svg>
