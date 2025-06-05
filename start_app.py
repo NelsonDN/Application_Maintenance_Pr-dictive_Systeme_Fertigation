@@ -31,6 +31,7 @@ def start_application():
     # Créer l'application
     print("🔧 Initialisation de l'application...")
     from hhch import app, socketio
+    # from hhch_esp32 import app, socketio
     
     print()
     print("=== Application démarrée avec succès ===")
@@ -47,7 +48,7 @@ def start_application():
         # Démarrer le serveur
         socketio.run(
             app, 
-            host='127.0.0.1', 
+            host='0.0.0.0', 
             port=5000, 
             debug=False,
             use_reloader=False,

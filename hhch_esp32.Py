@@ -742,4 +742,4 @@ if __name__ == '__main__':
     print("Utilisateur : admin")
     print("Mot de passe : admin123")
     print("=====================================")
-    socketio.run(app, host='127.0.0.1', port=5000, debug=False, use_reloader=False)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=False, use_reloader=False)
